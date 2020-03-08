@@ -1,0 +1,120 @@
+commit 39b16395d7ec5e3b40c036d4b8a4e5213f026b86
+Author: David Mendenhall <dpmendenhall@gmail.com>
+Date:   Wed Feb 26 21:21:54 2020 -0800
+
+    AFL support
+
+diff --git a/src/files.c b/src/files.c
+index 0de6870f7..62df2136c 100644
+--- a/src/files.c
++++ b/src/files.c
+@@ -2060,6 +2060,7 @@ const char *default_configfile =
+ #endif
+ #endif
+ 
++char *cmdline_configfile;
+ /* used for messaging */
+ char configfile[BUFSZ];
+ 
+@@ -2182,10 +2183,13 @@ int src;
+         return fp;
+ #else /* should be only UNIX left */
+     envp = nh_getenv("HOME");
+-    if (!envp)
+-        Strcpy(tmp_config, default_configfile);
++    if (cmdline_configfile)
++        strncpy(tmp_config, cmdline_configfile, sizeof tmp_config);
++    else if (!envp)
++        strcpy(tmp_config, configfile);
+     else
+-        Sprintf(tmp_config, "%s/%s", envp, default_configfile);
++        sprintf(tmp_config, "%s/%s", envp, configfile);
++    tmp_config[sizeof tmp_config - 1] = 0;
+ 
+     set_configfile_name(tmp_config);
+     if ((fp = fopenp(configfile, "r")) != (FILE *) 0)
+diff --git a/src/role.c b/src/role.c
+index f93859da1..969bc4a63 100644
+--- a/src/role.c
++++ b/src/role.c
+@@ -1643,7 +1643,7 @@ int buflen, rolenum, racenum, gendnum, alignnum;
+ void
+ plnamesuffix()
+ {
+-    char *sptr, *eptr;
++    char *sptr;//, *eptr;
+     int i;
+ 
+     /* some generic user names will be ignored in favor of prompting */
+@@ -1658,7 +1658,7 @@ plnamesuffix()
+                 *g.plname = '\0'; /* call askname() */
+         }
+     }
+-
++#if 0
+     do {
+         if (!*g.plname)
+             askname(); /* fill g.plname[] if necessary, or set defer_plname */
+@@ -1683,7 +1683,7 @@ plnamesuffix()
+                 flags.initalign = i;
+         }
+     } while (!*g.plname && !iflags.defer_plname);
+-
++#endif
+     /* commas in the g.plname confuse the record file, convert to spaces */
+     for (sptr = g.plname; *sptr; sptr++) {
+         if (*sptr == ',')
+diff --git a/sys/unix/unixmain.c b/sys/unix/unixmain.c
+index f1e5dcb74..b2e464458 100644
+--- a/sys/unix/unixmain.c
++++ b/sys/unix/unixmain.c
+@@ -16,6 +16,8 @@
+ #include <fcntl.h>
+ #endif
+ 
++extern char *cmdline_configfile;
++
+ #if !defined(_BULL_SOURCE) && !defined(__sgi) && !defined(_M_UNIX)
+ #if !defined(SUNOS4) && !(defined(ULTRIX) && defined(__GNUC__))
+ #if defined(POSIX_TYPES) || defined(SVR4) || defined(HPUX)
+@@ -187,7 +189,9 @@ char *argv[];
+ #ifdef __linux__
+     check_linux_console();
+ #endif
++    process_options(argc, argv); /* command line options */
+     initoptions();
++    exit(0);
+ #ifdef PANICTRACE
+     ARGV0 = g.hname; /* save for possible stack trace */
+ #ifndef NO_SIGNAL
+@@ -205,7 +209,6 @@ char *argv[];
+     sethanguphandler((SIG_RET_TYPE) hangup);
+ #endif
+ 
+-    process_options(argc, argv); /* command line options */
+ #ifdef WINCHAIN
+     commit_windowchain();
+ #endif
+@@ -446,6 +449,9 @@ char *argv[];
+         case '@':
+             flags.randomall = 1;
+             break;
++	case 'z': /* config file */
++	    cmdline_configfile = argv[1];
++	    break;
+         default:
+             if ((i = str2role(&argv[0][1])) >= 0) {
+                 flags.initrole = i;
+diff --git a/win/tty/wintty.c b/win/tty/wintty.c
+index 084f82939..4d2b80057 100644
+--- a/win/tty/wintty.c
++++ b/win/tty/wintty.c
+@@ -1363,7 +1363,7 @@ getret()
+     xputs(" to continue: ");
+     if (flags.standout)
+         standoutend();
+-    xwaitforspace(" ");
++    //xwaitforspace(" ");
+ }
+ #endif
+ 

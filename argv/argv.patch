@@ -1,0 +1,46 @@
+diff --git a/sys/share/unixtty.c b/sys/share/unixtty.c
+index 3196f3b3d..5b57f85ee 100644
+--- a/sys/share/unixtty.c
++++ b/sys/share/unixtty.c
+@@ -226,7 +226,7 @@ gettty()
+         curttyb.tabflgs &= ~EXTABS;
+         setctty();
+     }
+-    settty_needed = TRUE;
++    //settty_needed = TRUE;
+ }
+ 
+ /* reset terminal to original state */
+diff --git a/sys/unix/unixmain.c b/sys/unix/unixmain.c
+index b2e464458..5d4ee719d 100644
+--- a/sys/unix/unixmain.c
++++ b/sys/unix/unixmain.c
+@@ -16,6 +16,8 @@
+ #include <fcntl.h>
+ #endif
+ 
++#include "/home/dmendenhall/AFLplusplus/examples/argv_fuzzing/argv-fuzz-inl.h"
++
+ extern char *cmdline_configfile;
+ 
+ #if !defined(_BULL_SOURCE) && !defined(__sgi) && !defined(_M_UNIX)
+@@ -62,6 +64,8 @@ char *argv[];
+ 
+     early_init();
+ 
++	AFL_INIT_ARGV();
++
+ #if defined(__APPLE__)
+     {
+ /* special hack to change working directory to a resource fork when
+@@ -450,8 +454,8 @@ char *argv[];
+             flags.randomall = 1;
+             break;
+ 	case 'z': /* config file */
+-	    cmdline_configfile = argv[1];
+-	    break;
++	    //cmdline_configfile = argv[1];
++	    //break;
+         default:
+             if ((i = str2role(&argv[0][1])) >= 0) {
+                 flags.initrole = i;

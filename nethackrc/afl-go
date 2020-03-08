@@ -1,0 +1,8 @@
+#!/bin/sh
+~/AFLplusplus/afl-fuzz -i in/ -o out/ -x nethack.dict -t50 -M fuzzer00 -p exploit ~/NetHack/src/nethack -uf0 -z @@ &
+~/AFLplusplus/afl-fuzz -i in/ -o out/ -x nethack.dict -t50 -S fuzzer01 -p coe ~/NetHack/src/nethack -uf1 -z @@ 1>/dev/null 2>&1 &
+~/AFLplusplus/afl-fuzz -i in/ -o out/ -x nethack.dict -t50 -S fuzzer02 -p fast ~/NetHack/src/nethack -uf2 -z @@ 1>/dev/null 2>&1 &
+~/AFLplusplus/afl-fuzz -i in/ -o out/ -x nethack.dict -t50 -S fuzzer03 -p explore ~/NetHack/src/nethack -uf3 -z @@ 1>/dev/null 2>&1 &
+~/AFLplusplus/afl-fuzz -i in/ -o out/ -x nethack.dict -t50 -S fuzzer04 -p coe ~/NetHack/src/nethack -uf4 -z @@ 1>/dev/null 2>&1 &
+~/AFLplusplus/afl-fuzz -i in/ -o out/ -x nethack.dict -t50 -S fuzzer05 -p fast ~/NetHack/src/nethack -uf5 -z @@ 1>/dev/null 2>&1 &
+~/AFLplusplus/afl-fuzz -i in/ -o out/ -x nethack.dict -t50 -S fuzzer06 -p explore ~/NetHack/src/nethack -uf6 -z @@ 1>/dev/null 2>&1 &
